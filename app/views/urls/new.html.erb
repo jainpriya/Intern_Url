@@ -1,12 +1,9 @@
 <% provide(:title, "Create Short URL") %>
 <h1>Get long URL</h1>
-
-
-
 <div class="row">
- <div class="col-md-5 col-md-offset-3">
- 
-<% if @url.errors.any? %>
+<div class="col-md-5 col-md-offset-3">
+
+  <% if @url.errors.any? %>
     <div id="error_explanation">
       <h2>
         <%= pluralize(@url.errors.count, "error") %> prohibited
@@ -23,7 +20,6 @@
   	<div class="alert alert-<%= key %>"><%= value %></div>
  <%end%>
 
-
 <%= form_for @url,method: :post do |form| %>
     <%= form.label :long_url %><br>
     <%= form.text_field :long_url %><br>
@@ -33,20 +29,16 @@
 
 <br>
 <br>
-
 <%= form_with scope: :url, url: '/long_url', method: :get,local: true do |form| %> 
 <p>
     <%= form.label :Short_url %><br>
     <%= form.text_field :short_url %><br>
 </p>
- 
-<p>
+ <p>
     <%= form.submit "Create Url",class: "btn btn-primary"%> <br>
 </p>
 <% end %>
 <%= link_to 'Back',urls_path %>
-
-
 </div>
 </div>
 

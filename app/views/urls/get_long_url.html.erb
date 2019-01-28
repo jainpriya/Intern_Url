@@ -2,12 +2,12 @@
 
 <p align="center">
   <strong>Long_url:</strong>
-  <%= link_to @url.long_url, @url.long_url %> 
+  <%= link_to 'https://www.'+@url.long_url, 'https://www.'+@url.long_url %> 
 </p>
  
 <p align="center">
   <strong>Short_url:</strong>
-  <%= link_to 'https://www.'+@url.short_url, @url.long_url %>
+  <%= link_to 'https://www.'+@url.short_url, 'https://www.'+@url.long_url %>
 </p>
 
 <p align="center">

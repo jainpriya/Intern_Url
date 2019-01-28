@@ -21,14 +21,18 @@
          </tr>
       </thead>
 
-      <tbody>
+      <body>
         <% @urls.each do |url| %>
           <tr>
-            <td><%= url.long_url %></td>
-            <td><%= url.short_url %></td>
+            <td><%= link_to 'https://www.'+url.long_url, 'https://www.'+url.long_url %></td>
+            <td><%= link_to 'https://www.'+url.short_url, 'https://www.'+url.long_url %></td>
           </tr>
+          
         <% end %>
       <tbody>
     </table>
   <% end %>
 <% end %>
+
+
+
