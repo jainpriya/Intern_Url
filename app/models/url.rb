@@ -37,13 +37,10 @@ class Url < ApplicationRecord
     end
 
     def self.generate_short_url(long_url)
-		regex_for_domain=/.*\//
-		domain_name = long_url.match(regex_for_domain).to_s
-		encrypted_domain_name = Digest::SHA1.hexdigest(domain_name)[0, 3]
+		encrypted_domain_name = long_url[0, 3]
 		id_for_encryption = Url.last.id.to_s
-		encrypted_id = Base64.encode64(id_for_encryption)[0,3]
-		short_url = encrypted_domain_name + encrypted_id
-		short_url=Digest::MD5.hexdigest(short_url)[0, 6]
+		encrypted_id = Digest::MD5.hexdigest(Base64.encode64(id_for_encryption))[0,3]
+		short_url = encrypted_domain_name + '/' + encrypted_id
 	return short_url
 	end
 end
