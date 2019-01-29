@@ -1,14 +1,12 @@
+<%#View page to show long_url found from short_url%>
 <h2> Found</h2>
-
 <p align="center">
   <strong>Long_url:</strong>
   <%= link_to 'https://'+@url.long_url, 'https://'+@url.long_url %> 
 </p>
- 
-<p align="center">
+ <p align="center">
   <strong>Short_url:</strong>
   <%= link_to 'https://'+@url.short_url, 'https://'+@url.long_url %>
 </p>
-
 <p align="center">
 <%= link_to 'Back','/urls/new' %>
