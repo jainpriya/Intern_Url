@@ -1,5 +1,5 @@
 class CounterController < ApplicationController
-  #count daily number of new generated short_url
+  #counts daily number of new generated short_url
   def report
   	@count = Counter.last
   end

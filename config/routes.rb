@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
+  #Routes for Users
   devise_for :users
+  #Routes for Urls
   resources:urls
+  #Paths for sidekiq cron jobs
   require 'sidekiq/web'
   require 'sidekiq/cron/web'
   mount Sidekiq::Web, :at => '/sidekiq'

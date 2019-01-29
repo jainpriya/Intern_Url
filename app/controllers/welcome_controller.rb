@@ -1,4 +1,5 @@
 class WelcomeController < ApplicationController
-  def index
-  end
+	#Welcome page of api
+	def index
+  	end
 end

@@ -2,7 +2,6 @@
 <h1>Get long URL</h1>
 <div class="row">
 <div class="col-md-5 col-md-offset-3">
-
   <% if @url.errors.any? %>
     <div id="error_explanation">
       <h2>
@@ -15,11 +14,12 @@
         <% end %>
       </ul>
     </div>
-<% end %>
+  <% end %>
 <% flash.each do |key, value| %>
   	<div class="alert alert-<%= key %>"><%= value %></div>
  <%end%>
-
+<%#form for generating short_url from long url%>
+<%#Request type:Post%>
 <%= form_for @url,method: :post do |form| %>
     <%= form.label :long_url %><br>
     <%= form.text_field :long_url %><br>
@@ -29,6 +29,8 @@
 
 <br>
 <br>
+<%#form for finding long_url from short url%>
+<%#Request type:Get%>
 <%= form_with scope: :url, url: '/long_url', method: :get,local: true do |form| %> 
 <p>
     <%= form.label :Short_url %><br>

@@ -1,5 +1,7 @@
+<%#Welcome Page of Url shortener%>
 <h1>URL SHORTENER API</h1>
 <p align="center">
+<%#Check session%>
 <% if user_signed_in? %>
 
 	<li align="center"> <%= link_to 'logout' ,destroy_user_session_path , method: :delete%></li>
