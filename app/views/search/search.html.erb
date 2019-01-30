@@ -1,12 +1,12 @@
 <h1>Elastic search for urls</h1>
 
-<%= form_for :term, url: search_path, method: :get do |form| %>
+<%= form_with url: search_path, method: :get,local:true  do |form| %>
    <p>
+    <%= form.select :field, ['long_url', 'short_url']%>
     <%= text_field_tag :term %>
     <%= submit_tag "Search" %>
   </p>
 <% end %>
-<% unless @urls.nil? %>
   <% if @urls.empty? %>
     <h2>No urls found matching your query.</h2>
   <% else %>
@@ -31,7 +31,6 @@
       <tbody>
     </table>
   <% end %>
-<% end %>
 
 
 

@@ -1,10 +1,16 @@
 class SearchController < ApplicationController
-  # Uses elastic search to match words from starting 
+=begin
+Author:Priya Jain
+Objective:Uses elastic search to match words from starting
+Params:field(long_url/short_url);term(term to be searched)
+Output:urls
+=end 
   def search
     if params[:term].nil?
       @urls = []
     else
-      @urls = Url.search (params[:term]),fields: [:short_url], match: :word_start
+      @urls = Url.custom_search(params)
+      render 'search'
     end
   end
 end
