@@ -24,8 +24,8 @@
       <body>
         <% @urls.each do |url| %>
           <tr>
-            <td><%= link_to 'https://www.'+url.long_url, 'https://www.'+url.long_url %></td>
-            <td><%= link_to 'https://www.'+url.short_url, 'https://www.'+url.long_url %></td>
+            <td><%= link_to 'https://'+url.long_url, 'https://'+url.long_url %></td>
+            <td><%= link_to 'https://'+url.short_url, 'https://'+url.long_url %></td>
           </tr>
           
         <% end %>

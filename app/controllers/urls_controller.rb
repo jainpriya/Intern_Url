@@ -19,9 +19,10 @@ class UrlsController < ApplicationController
       @url_find = Rails.cache.fetch(@url.long_url , expires_in: 12.0.hours){ Url.find_by_long_url(@url.long_url) }
       @url.short_url = @url_find.nil? ? Url.shorten_url(@url.long_url): @url_find.short_url
       if @url.short_url == "Invalid Url"
+        @url.short_url=""
         flash[:notice] = "Invalid Url"
-        format.html {render :new}
-        format.json { render json: {"response": "invalid" }}
+        format.html {render :new,:status=>422}
+        format.json { render json: {"response": "invalid" },:status=>422}
       else
           format.html {render :show}
           format.json { render json: {"response": @url.short_url} }
@@ -46,9 +47,10 @@ class UrlsController < ApplicationController
           end
       @url.long_url = @url_find.nil? ? "Not found" : @url_find.long_url
       if @url.long_url == "Not found"
+        @url.long_url = ""
         flash[:error] = 'Doesn\'t exist in database'
-        format.html {render :new}
-        format.json {render json: {"response": "not found"}}
+        format.html {render :new,:status=>404}
+        format.json {render json: {"response": "not found"},:status=>404}
       else
         format.html{render 'get_long_url'}
         format.json{ render json: {"response": @url.long_url}}

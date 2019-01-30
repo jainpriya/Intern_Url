@@ -26,26 +26,42 @@ class Url < ApplicationRecord
     def self.shorten_url(long_url)
       @url = Url.new
       @url.long_url = long_url
-    @url.short_url = self.generate_short_url(long_url)
-    if(@url.save)
-      @url_find = Url.find_by_long_url(@url.long_url)
-      resp = @url_find.short_url
-      #Write in cache
-      Rails.cache.write(@url.long_url,@url_find)
-    else
-      resp = "Invalid Url"
+      @url.short_url = self.generate_short_url(long_url)
+      if(@url.save)
+        @url_find = Url.find_by_long_url(@url.long_url)
+        resp = @url_find.short_url
+        #Write in cache
+        Rails.cache.write(@url.long_url,@url_find)
+      else
+        resp = "Invalid Url"
     end
     return resp
     end
     #Encodes the long_url to short_url
     #Params:Long_url
-    #Output:Encoded short_url 
+    #Output:Encoded short_url
     def self.generate_short_url(long_url)
-    encrypted_domain_name = long_url[0, 3]
-    id_for_encryption = Url.last.id.to_s
-    encrypted_id = Digest::MD5.hexdigest(Base64.encode64(id_for_encryption))[0,3]
-    short_url = encrypted_domain_name + '/' + encrypted_id
-  return short_url
-  end
+      regex_for_domain=/.*\./
+      domain_name = long_url.match(regex_for_domain).to_s
+      domain_name = self.encrypt_domain_name(domain_name)
+      id_for_encryption = Url.last.id.to_s
+      encrypted_id = Digest::MD5.hexdigest(Base64.encode64(id_for_encryption))[0,3]
+      short_url = domain_name+'/'+encrypted_id
+      return short_url
+    end
+    #Encrypts domain name 
+    def self.encrypt_domain_name(domain_name)
+      case domain_name
+      when "housing."
+        domain_name = "hsg.com"
+      when "makaan."
+        domain_name = "mkn.com"
+      when "proptiger."
+        domain_name = "ptr.com"
+      else
+        domain_name = domain_name[0,3]+".com"
+      end
+      return domain_name
+    end
 end
 
