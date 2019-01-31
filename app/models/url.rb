@@ -50,11 +50,10 @@ class Url < ApplicationRecord
     end
   end
 =begin
-Author:Priya Jain
-Authentication Required:None
-Objective:Provides custom search for long and short urls
-Params:Field(long_url/short_url);term(to be searched)
-Output:objects of type url which matches search results  
+**Author:** Priya Jain
+**Objective:** Custom search for Elastic search
+**Params:** field :long_url/short_url ;Term : keyword that is to be searched
+**Output:** Url type objects containing related long_url /short_url
 =end
   def self.custom_search(params)
     field = params[:field]+".trigram"
@@ -74,59 +73,76 @@ Output:objects of type url which matches search results
     return urls
   end
 =begin
-Author:Priya Jain
-Authentication Required:None
-Objective:Increments the count of newly generated short_url every time a new _url is genearted and saved in database
-Params:None
-Output:Increments the count of generated short url in Redis
+**Author:** Priya Jain
+**Objective:** increment count of generated hits
+**Output:** Perform asynchronously increment operation
 =end
   def increment_count_generated_url
-    $redis.incr (Date.today)
+    CountWorker.perform_async
   end
 =begin
-Author:Priya Jain
-Objective:Gives a short Url and returns the genearted url or Invalid Url
-Params:long_url from urls controller
-Output:Generated short_url or invalid if long_url is invalid
+**Author:** Priya Jain
+**Objective:** Generates short Url from Long url 
+**Params:** Long_url,type: text ,required: yes, DESCRIPTION-> 'long Url which is to be converted'
+**Output:** short_url /invalid (if long_url is not valid)
 =end
   def self.shorten_url(long_url)
     @url = Url.new
     @url.long_url = long_url
-    @url.short_url = self.generate_short_url(long_url)
-    if(@url.save)
-      @url_find = Url.find_by_long_url(@url.long_url)
-      resp = @url_find.short_url
-      #Write in cache
-      Rails.cache.write(@url.long_url,@url_find)
+    @url.domain_name = self.fetch_domain_name(@url.long_url)
+    @url_find =Url.find_by :domain_name => @url.domain_name, :long_url => @url.long_url
+    if(@url_find.blank?)
+      @url.short_url = self.generate_short_url(@url.long_url,@url.domain_name,@url.long_url.length)
+      while(Url.exists?(short_url: @url.short_url))
+        @url.short_url = self.generate_short_url(@url.long_url,@url.domain_name,(@url.long_url.length)+1)
+      end
+      if(@url.save)
+        return @url.short_url
+      else
+        return "invalid Url"
+      end
     else
-      resp = "Invalid Url"
+      return @url_find.short_url
     end
-    return resp
   end
 =begin
-  Author:Priya Jain
-  Objective:Encodes the long_url to short_url if long_url is valid
-  Params:Long_url
-  Output:Encoded short_url
+**Author:** Priya Jain
+**Objective:** Encode short Url from Long url 
+**Params:** Long_url,type: text ,required: yes, DESCRIPTION-> 'long Url which is to be converted'
+            Domain,type:text,required:yes,DESCRIPTION->'Domain which is to be appended'
+            length,type:integer,required:yes,DESCRIPTION->'length of the long_url'
+**Output:** short_url
 =end
-  def self.generate_short_url(long_url)
-    regex_for_domain=/.*\./
-    domain_name = long_url.match(regex_for_domain).to_s
+  def self.generate_short_url(long_url,domain_name,length)
     domain_name = self.encrypt_domain_name(domain_name)
-    encrypted_id = Digest::MD5.hexdigest(long_url)[0,6]
-    short_url = domain_name+'/'+encrypted_id
+    encrypted_url = Digest::MD5.hexdigest(long_url)[0,6]
+    encrypted_id = Digest::MD5.hexdigest(Base64.encode64(length.to_s))[0,2]
+    short_url = domain_name+'/'+encrypted_url+encrypted_id
     return short_url
   end
 =begin
-Author:Priya Jain
-Objective:Encodes the long_url to short_url if long_url is valid
-Params:Long_url
-Output:Encoded short_url
-=end 
+**Author:** Priya Jain
+**Objective:** Encode domain_name from domain_name 
+**Params:**Domain,type:text,required:yes,DESCRIPTION->'Domain which is to be appended'
+**Output:** encrypted domain name
+=end
   def self.encrypt_domain_name(domain_name)
     @domain = Domain.find_by_domain_name(domain_name)
     encrypted_domain_name = @domain.nil? ? "others.com" : @domain.short_domain 
     return encrypted_domain_name
   end
+=begin
+**Author:** Priya Jain
+**Objective:** Fetch domain_name from long_url 
+**Params:**Long_url,type: text ,required: yes, DESCRIPTION-> 'long Url from which domain is to be extracted'
+**Output:**domain name
+=end
+  def self.fetch_domain_name(long_url)
+    regex_for_domain=/.*\./
+    domain_name = long_url.match(regex_for_domain).to_s
+    return domain_name
+  end
 end
+
+
 

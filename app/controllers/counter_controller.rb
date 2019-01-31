@@ -1,6 +1,15 @@
 class CounterController < ApplicationController
-  #counts daily number of new generated short_url
+=begin
+Author:Priya Jain
+Objective:Reports the number of created short urls in a day
+Request: Get
+Path :'counter/report'
+=end
   def report
-    @count = Counter.last
+  	respond_to do |format|
+      @count = Counter.last
+      format.html{render :report}
+      format.json{render json:{"count" => @count.count }}
+    end
   end
-end
+  end

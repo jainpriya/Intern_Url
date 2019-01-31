@@ -1,47 +1,127 @@
 class UrlsController < ApplicationController
-  skip_before_action :verify_authenticity_token
+  before_action :verify_authenticity_token,only: [:new,:show ]
+=begin
+**Author:** Priya Jain
+**Common-Name:** Startin Page of Api
+**Request-Type** : Get
+**Routes** : /urls
+**url:** URI("localhost:3000/urls)
+**section** Sample Api Request
+     section: Get request
+     post request : localhost:3000/urls
+     response : body {
+                      "status": "200/rendered",
+    --------------------------------------
+**Content-Type:** application/json; charset=utf-8
+**Output-Type:** HTML
+**Output-Fields:** HTML 
+**Host:** localhost:3000
+=end
   def index
     flash[:notice] = ""
     flash[:error] = ""
   end
-  #shows the view of short_url generated from long_url
-  #Params:[:id]
+=begin
+**Author:** Priya Jain
+**Common-Name:** Show Results of Create Request
+**Request-Type** : Get
+**url:** URI("localhost:3000/urls)
+    response : body {
+                    "status": "200/rendered",
+    --------------------------------------
+**Content-Type:** application/json; charset=utf-8
+**Output-Type:** HTML
+**Output-Fields:** HTML 
+**Host:** localhost:3000
+=end
   def show
   end
-  #Generates a new form 
+=begin
+**Author:** Priya Jain
+**Common-Name:** Process api request form  for converting long url to short url/searching short_url from long_url
+**End-points:** Create
+**Request-Type** : Get
+**Routes** : /urls/new
+**url:** URI("localhost:3000/urls/new)
+**section** Sample Api Request
+     section: Get request
+     post request : localhost:3000/urls/new
+     response : body {
+                      "status": "200/rendered",
+    --------------------------------------
+**Content-Type:** application/json; charset=utf-8
+**Output-Type:** HTML
+**Output-Fields:** HTML FORM
+**Host:** localhost:3000
+=end
   def new
     flash[:notice] = ""
     @url = Url.new
   end
-  #Create a short_url for given long_url
-  #params: long_url can be send in json and html form
-  #Request Type: Post
-  #Output:short_url in json and html format
-  #Path:https://localhost:3000/url_shorteners
+=begin
+**Author:** Priya Jain
+**Common-Name:** Process api post request for converting long url to short url
+**End-points:** Other services
+**Request-Type** : Post
+**Routes** : url_shorteners
+**url:** URI("localhost:3000/url_shorteners)
+**Params:** long_url,type: text ,required: yes, DESCRIPTION-> 'Long Url which is to be converted'
+**section** Sample Api Request
+     section: Post request
+     post request : localhost:3000/url_shorteners
+     response : body {
+                      "status": "200/OK;422/unprocessable entity",
+                      "short_url": "hsg.com/940f7da6",
+                      "long_url": "https://housing.com/news/budget-2018",
+                      "domain": "housing"
+                      },
+    --------------------------------------
+**Content-Type:** application/json; charset=utf-8
+**Output-Type:** JSON
+**Output-Fields:** status,long_url,short_url
+**Host:** localhost:3000
+=end
   def create
     @url = Url.new(url_params)
-    @url.long_url = sanitize(@url.long_url)
+    long_url = sanitize(@url.long_url)
     respond_to do |format|
-      #Using Redis cache store
-      @url_find = Rails.cache.fetch(@url.long_url , expires_in: 12.0.hours){ Url.find_by_long_url(@url.long_url) }
-      @url.short_url = @url_find.nil? ? Url.shorten_url(@url.long_url): @url_find.short_url
-      if @url.short_url == "Invalid Url"
-        @url.short_url=""
+      @url.short_url = Url.shorten_url(long_url)
+      if(@url.short_url == "invalid Url")
+        @url.short_url = ""
         flash[:notice] = "Invalid Url"
         format.html {render :new,:status=>422}
         format.json { render json: {"response": "invalid" },:status=>422}
       else
-          format.html {render :show}
-          format.json { render json: {"response": @url.short_url} }
-        end
+        format.html {render :show}
+        format.json { render json: {"response": @url.short_url} }
+      end
     end
   end
-  
-  #Gets a long_url from short_url from database
-  #Params:short_url in json and html format
-  #Request Type:Get
-  #Output:Long_url in json and html format
-  #Path:https://localhost:3000/long_url?short_url=params
+=begin
+**Author:** Priya Jain
+**Common-Name:** Process api get request for retrieving long url from short url
+**End-points:** Other services
+**Request-Type** : Get
+**Routes** : long_url
+**url:** URI("localhost:3000/long_url?url={short_url = "hsg.com/940f7da6"})
+**Params:** short_url,type: string ,required: yes, DESCRIPTION-> 'Short Url which is to be searched'
+**section** Sample Api Request
+     section: Get request
+     post request : localhost:3000/long_url
+     response : body {
+                      "status": "200/OK;404/not found",
+                      "short_url": "hsg.com/940f7da6",
+                      "long_url": "https://housing.com/news/budget-2018",
+                      "domain": "housing"
+                      },
+                     
+
+     --------------------------------------
+**Content-Type:** application/json; charset=utf-8
+**Output-Type:** JSON
+**Output-Fields:** status,long_url,short_url
+**Host:** localhost:3000
+=end
   def get_long_url
     @url = Url.new(url_params)
     @url.short_url = sanitize(@url.short_url)
@@ -59,11 +139,21 @@ class UrlsController < ApplicationController
       end
     end
   end
-
+=begin
+**Author:** Priya Jain
+**Common-Name:** Process for sanitizing long url of different syntax but same paths
+**End-points:** Create / get_long_url request
+**Params:** long_url,type: text ,required: yes, DESCRIPTION-> 'long Url which is to be sanitized'
+  response : body {
+                    "long_url": "https://///housing.com/news/budget-2018",
+                    "long_url": "https://housing.com/news/budget-2018",
+                    "domain": "housing"
+                      },
+                --------------------------------------
+**Output-Fields:** status,long_url,sanitized long_url
+**Host:** localhost:3000
+=end
   private
-  #Interprets all urls as same with differing syntax of same paths
-  #Params:Long_url given by the user in new form
-  #Output:santized url with stripped out https://www.
   def sanitize(long_url)
     long_url.strip!
     sanitized_url = long_url.downcase.gsub(/(https?:\/\/)|(www\.)|(http:\/\/)/, "")
@@ -73,9 +163,11 @@ class UrlsController < ApplicationController
     end
     return sanitized_url
   end
-  #Only permits those params that are required.Done for safety purpose
+=begin
+Author:Priya Jain
+Objective:Only permits those params that are required.Done for safety purpose
+=end
   def url_params
     params.require(:url).permit(:long_url, :short_url)
   end
-
 end
