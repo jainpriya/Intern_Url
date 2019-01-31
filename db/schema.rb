@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_01_30_112324) do
+ActiveRecord::Schema.define(version: 2019_01_31_064520) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,8 @@ ActiveRecord::Schema.define(version: 2019_01_30_112324) do
     t.datetime "updated_at", null: false
     t.index ["date"], name: "index_counters_on_date"
   end
+
+ 
 
   create_table "domains", force: :cascade do |t|
     t.string "domain_name"

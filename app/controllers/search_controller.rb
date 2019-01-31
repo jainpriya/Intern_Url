@@ -3,7 +3,9 @@ class SearchController < ApplicationController
 Author:Priya Jain
 Objective:Uses elastic search to match words from starting
 Params:field(long_url/short_url);term(term to be searched)
-Output:urls
+Request:Get
+Path:"/search"
+Output:urls object
 =end 
   def search
     if params[:term].nil?

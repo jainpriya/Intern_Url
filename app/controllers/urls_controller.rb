@@ -1,5 +1,5 @@
 class UrlsController < ApplicationController
-  before_action :verify_authenticity_token,only: [:new,:show ]
+  skip_before_action :verify_authenticity_token
 =begin
 **Author:** Priya Jain
 **Common-Name:** Startin Page of Api
@@ -18,23 +18,32 @@ class UrlsController < ApplicationController
 **Host:** localhost:3000
 =end
   def index
-    flash[:notice] = ""
-    flash[:error] = ""
+    if(!user_signed_in?)
+      redirect_to root_path
+    else
+      flash[:notice] = ""
+      flash[:error] = ""
+    end
   end
 =begin
 **Author:** Priya Jain
 **Common-Name:** Show Results of Create Request
 **Request-Type** : Get
+**Params**: [:id] of the object to be printed
 **url:** URI("localhost:3000/urls)
     response : body {
                     "status": "200/rendered",
     --------------------------------------
-**Content-Type:** application/json; charset=utf-8
+**Content-Type:** application/json,text/html; charset=utf-8
 **Output-Type:** HTML
 **Output-Fields:** HTML 
 **Host:** localhost:3000
 =end
   def show
+    if(!user_signed_in?)
+    else
+      redirect_to root_path
+    end
   end
 =begin
 **Author:** Priya Jain
@@ -49,14 +58,18 @@ class UrlsController < ApplicationController
      response : body {
                       "status": "200/rendered",
     --------------------------------------
-**Content-Type:** application/json; charset=utf-8
+**Content-Type:** application/json,text/html; charset=utf-8
 **Output-Type:** HTML
 **Output-Fields:** HTML FORM
 **Host:** localhost:3000
 =end
   def new
-    flash[:notice] = ""
-    @url = Url.new
+    if(user_signed_in?)
+      flash[:notice] = ""
+      @url = Url.new
+    else
+      redirect_to root_path
+    end
   end
 =begin
 **Author:** Priya Jain
